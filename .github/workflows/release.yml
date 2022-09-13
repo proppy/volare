@@ -39,7 +39,7 @@ jobs:
           VOLARE_PATH=$(env/bin/volare path)
           PDK_FAMILY=${{ matrix.family }}
           PDK_VERSION=$(ls -t $VOLARE_PATH/volare/$PDK_FAMILY/versions | head -n 1)
-          tar -C $VOLARE_PATH/$PDK_FAMILY/versions/$PDK_VERSION \
+          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/versions/$PDK_VERSION \
               -cvJf default.tar.xz .
           echo "PDK_VERSION=$PDK_VERSION" >> $GITHUB_ENV
           PDK_DATE=$(git --git-dir $(env/bin/volare path)/volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)
