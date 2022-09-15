@@ -68,7 +68,7 @@ jobs:
         run: |
           VOLARE_PATH=$(env/bin/volare path)
           VOLARE_REV=$(git rev-parse HEAD)
-          VOLARE_DATE=$(git log -1 --pretty=format:"%ad" --date=iso)
+          VOLARE_DATE=$(git log -1 --pretty=format:"%ad" --date=iso8601-strict)
           VOLARE_SHORT=$(git rev-parse --short HEAD)
           echo "VOLARE_PATH=$VOLARE_PATH" >> $GITHUB_ENV
           echo "VOLARE_REV=$VOLARE_REV" >> $GITHUB_ENV
@@ -81,7 +81,7 @@ jobs:
           OPEN_PDKS_PATH=$(readlink -f open_pdks)
           OPEN_PDKS_REV=$(cd $OPEN_PDKS_PATH && git rev-parse HEAD)
           OPEN_PDKS_SHORT=$(cd $OPEN_PDKS_PATH && git rev-parse --short HEAD)
-          OPEN_PDKS_DATE=$(cd $OPEN_PDKS_PATH && git log -1 --pretty=format:"%ad" --date=iso)
+          OPEN_PDKS_DATE=$(cd $OPEN_PDKS_PATH && git log -1 --pretty=format:"%ad" --date=iso8601-strict)
           echo "OPEN_PDKS_PATH=$OPEN_PDKS_PATH" >> $GITHUB_ENV
           echo "OPEN_PDKS_REV=$OPEN_PDKS_REV" >> $GITHUB_ENV
           echo "OPEN_PDKS_SHORT=$OPEN_PDKS_SHORT" >> $GITHUB_ENV
@@ -92,7 +92,7 @@ jobs:
           GFMCU180_PDK_PATH=$(readlink -f gf180mcu-pdk)
           GFMCU180_PDK_REV=$(cd $GFMCU180_PDK_PATH && git rev-parse HEAD)
           GFMCU180_PDK_SHORT=$(cd $GFMCU180_PDK_PATH && git rev-parse --short HEAD)
-          GFMCU180_PDK_DATE=$(cd $GFMCU180_PDK_PATH && git log -1 --pretty=format:"%ad" --date=iso)
+          GFMCU180_PDK_DATE=$(cd $GFMCU180_PDK_PATH && git log -1 --pretty=format:"%ad" --date=iso8601-strict)
           echo "GFMCU180_PDK_PATH=$GFMCU180_PDK_PATH" >> $GITHUB_ENV
           echo "GFMCU180_PDK_REV=$GFMCU180_PDK_REV" >> $GITHUB_ENV
           echo "GFMCU180_PDK_SHORT=$GFMCU180_PDK_SHORT" >> $GITHUB_ENV
