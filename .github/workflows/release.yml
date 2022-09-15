@@ -78,7 +78,7 @@ jobs:
           env/bin/volare build \
             --pdk ${{ matrix.family }} \
             --metadata-file=OpenLane/dependencies/tool_metadata.yml \
-            --use-repo-at open_pdks=$OPEN_PDKS_DIR
+            --use-repo-at open_pdks=$OPEN_PDKS_DIR \
             --use-repo-at gf180mcu=$FOUNDRY_PDK_DIR
         if: steps.cache.outputs.cache-hit != 'true'
 
