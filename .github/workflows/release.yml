@@ -171,7 +171,7 @@ jobs:
       GFMCU180_PDK_SHORT: ${{ needs.pdk.outputs.GFMCU180_PDK_SHORT }}
       TAG: ${{ needs.pdk.outputs.TAG }}
       TAG_EXISTS: ${{ needs.pdk.outputs.TAG_EXISTS }}
-
+    runs-on: ubuntu-latest
     steps:
       - name: restore build cache
         uses: actions/cache@v3
@@ -196,6 +196,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.TAG }}
+          tag_name: ${{ env.TAG }}
           body: |
             ${{ env.PDK_FAMILY }} variants built using open_pdks ${{ env.OPEN_PDKS_REV }} (released on ${{ env.OPEN_PDKS_DATE }})
 
