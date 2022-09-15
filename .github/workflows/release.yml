@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/30 * * * *"
 
 env:
   CACHE_NUMBER: 0
@@ -173,6 +173,8 @@ jobs:
       TAG_EXISTS: ${{ needs.pdk.outputs.TAG_EXISTS }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: restore build cache
         uses: actions/cache@v3
         with:
