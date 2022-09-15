@@ -55,17 +55,32 @@ jobs:
           OPEN_PDKS_DIR=$(readlink -f open_pdks)
           OPEN_PDKS_REV=$(git --git-dir $OPEN_PDKS_DIR/.git rev-parse HEAD)
           OPEN_PDKS_DATE=$(git --git-dir $OPEN_PDKS_DIR/.git log -1 --pretty=format:"%ad" --date=iso)
+          FOUNDRY_PDK_DIR=$(readlink -f gf180mcu-pdk)
+          FOUNDRY_PDK_REV=$(git --gir-dir $FOUNDRY_PDK_DIR/.git rev-parse HEAD)
           echo "OPEN_PDKS_DIR=$OPEN_PDKS_DIR" >> $GITHUB_ENV
           echo "OPEN_PDKS_REV=$OPEN_PDKS_REV" >> $GITHUB_ENV
           echo "OPEN_PDKS_DATE=$OPEN_PDKS_DATE" >> $GITHUB_ENV
+          echo "FOUNDRY_PDK_DIR=$FOUNDRY_PDK_DIR" >> $GITHUB_ENV
+          echo "FOUNDRY_PDK_REV=$FOUNDRY_PDK_REV >> $GITHUB_ENV
+
+      - name: cache build
+        id: cache
+        uses: actions/cache@v3
+        env:
+          CACHE_NUMBER: 0
+        with:
+          path: ${{ env.VOLARE_PATH }}/volare/${{ env.PDK_FAMILY}}/build/${{ env.OPEN_PDKS_REV}}
+          key:
+            ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.FOUNDRY_PDK_REV }}
 
       - name: build
         run: |
           env/bin/volare build \
             --pdk ${{ matrix.family }} \
             --metadata-file=OpenLane/dependencies/tool_metadata.yml \
-            --use-repo-at open_pdks=$(readlink -f open_pdks) \
-            --use-repo-at gf180mcu=$(readlink -f gf180mcu-pdk)
+            --use-repo-at open_pdks=$OPEN_PDKS_DIR
+            --use-repo-at gf180mcu=$FOUNDRY_PDK_DIR
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: upload logs
         uses: actions/upload-artifact@v3
@@ -77,7 +92,7 @@ jobs:
 
       - name: compress
         run: |
-          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/build/$OPEN_PDKS_VERSION/ \
+          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/build/$OPEN_PDKS_REV/ \
               -cvJf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
 
       - name: upload archive
@@ -89,9 +104,9 @@ jobs:
 
       - uses: softprops/action-gh-release@v1
         with:
-          name: ${{ matrix.family }}-${{ env.OPEN_PDKS_VERSION }}
+          name: ${{ matrix.family }}-${{ env.OPEN_PDKS_REV }}
           body: |
-            ${{ env.PDK_FAMILY }} variants built using open_pdks ${{ env.OPEN_PDKS_VERSION }} (released on ${{ env.OPEN_PDKS_DATE }})
+            ${{ env.PDK_FAMILY }} variants built using open_pdks ${{ env.OPEN_PDKS_REV }} (released on ${{ env.OPEN_PDKS_DATE }})
           files: |
             default.tar.xz
         if: startsWith(github.ref, 'refs/tags/')
