@@ -46,7 +46,7 @@ jobs:
 
       - uses: actions/checkout@v3
         with:
-          repository: 'efabless/open_pdks'
+          repository: 'RTimothyEdwards/open_pdks'
           ref: 'master'
           path: 'open_pdks'
 
