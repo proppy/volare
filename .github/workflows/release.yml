@@ -71,15 +71,15 @@ jobs:
 
       - name: env version
         run: |
-          PDK_VERSION=$(ls -t $VOLARE_PATH/volare/$PDK_FAMILY/versions | head -n 1)
-          PDK_DATE=$(git --git-dir /volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)
+          PDK_VERSION=$(ls -t $VOLARE_PATH/volare/$PDK_FAMILY/build/ | head -n 1)
+          PDK_DATE=$(git --git-dir $VOLARE_PATH/volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)
           echo "PDK_VERSION=$PDK_VERSION" >> $GITHUB_ENV
           echo "PDK_DATE=$PDK_DATE" >> $GITHUB_ENV
 
       - name: compress
         run: |
-          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/versions/$PDK_VERSION \
-              -cvJf default.tar.xz .
+          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/build/$PDK_VERSION/ \
+              -cvJf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
 
       - name: upload archive
         uses: actions/upload-artifact@v3
