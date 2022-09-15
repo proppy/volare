@@ -31,23 +31,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: install volare
-        run: |
-          python -m venv env
-          env/bin/python -m pip install -r requirements.txt
-          env/bin/python -m pip install .
-
-      - uses: actions/checkout@v3
-        with:
-          repository: 'The-OpenROAD-Project/OpenLane'
-          ref: 'master'
-          path: 'OpenLane'
-
       - uses: actions/checkout@v3
         with:
           repository: 'efabless/open_pdks'
@@ -59,7 +42,6 @@ jobs:
           repository: 'google/gf180mcu-pdk'
           ref: 'main'
           path: 'gf180mcu-pdk'
-          submodules: true
 
       - id: env
         name: env
@@ -110,6 +92,28 @@ jobs:
           path: ${{ env.VOLARE_PATH }}/volare/gf180mcu/build/${{ env.OPEN_PDKS_REV}}
           key:
             ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
+
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: install volare
+        run: |
+          python -m venv env
+          env/bin/python -m pip install -r requirements.txt
+          env/bin/python -m pip install .
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'The-OpenROAD-Project/OpenLane'
+          ref: 'master'
+          path: 'OpenLane'
+
+      - name: init submodules
+        working-directory: gf180mcu-pdk
+        run: |
+          git submodule update --init --recursive
 
       - name: build
         if: steps.cache.outputs.cache-hit != 'true'
