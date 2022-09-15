@@ -50,9 +50,9 @@ jobs:
         run: |
           VOLARE_PATH=$(env/bin/volare path)
           PDK_FAMILY=${{ matrix.family }}
-          echo "VOLARE_PATH=$VOLARE_PATH >> $GITHUB_ENV          
-          echo "PDK_FAMILY=$PDK_FAMILY >> $GITHUB_ENV
-          
+          echo "VOLARE_PATH=$VOLARE_PATH" >> $GITHUB_ENV
+          echo "PDK_FAMILY=$PDK_FAMILY" >> $GITHUB_ENV
+
       - name: build
         run: |
           env/bin/volare build \
@@ -60,18 +60,21 @@ jobs:
             --metadata-file=OpenLane/dependencies/tool_metadata.yml \
             --use-repo-at open_pdks=$(readlink -f open_pdks) \
             --use-repo-at gf180mcu=$(readlink -f gf180mcu-pdk)
-          PDK_VERSION=$(ls -t $VOLARE_PATH/volare/$PDK_FAMILY/versions | head -n 1)
-          PDK_DATE=$(git --git-dir $(env/bin/volare path)/volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)          
-          echo "PDK_VERSION=$PDK_VERSION" >> $GITHUB_ENV
-          echo "PDK_DATE=$PDK_DATE" >> $GITHUB_ENV
 
       - name: upload logs
         uses: actions/upload-artifact@v3
         with:
             name: ${{ matrix.family }}-build-logs
             path: |
-              ${{ env.VOLARE_PATH }}/volare/logs
+              ${{ env.VOLARE_PATH }}/volare/logs/*/*.log
         if: always()
+
+      - name: env version
+        run: |
+          PDK_VERSION=$(ls -t $VOLARE_PATH/volare/$PDK_FAMILY/versions | head -n 1)
+          PDK_DATE=$(git --git-dir /volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)
+          echo "PDK_VERSION=$PDK_VERSION" >> $GITHUB_ENV
+          echo "PDK_DATE=$PDK_DATE" >> $GITHUB_ENV
 
       - name: compress
         run: |
@@ -89,7 +92,7 @@ jobs:
         with:
           name: ${{ matrix.family }}-${{ env.PDK_VERSION }}
           body: |
-            ${{ matrix.family }} variants built using open_pdks ${{ env.PDK_VERSION }} (released on ${{ env.PDK_DATE }})
+            ${{ env.PDK_FAMILY }} variants built using open_pdks ${{ env.PDK_VERSION }} (released on ${{ env.PDK_DATE }})
           files: |
             default.tar.xz
         if: startsWith(github.ref, 'refs/tags/')
