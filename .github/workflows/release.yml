@@ -182,7 +182,7 @@ jobs:
           key:
             ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
 
-      - name: tar
+      - name: compress
         run: |
           tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
               -cvJhf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
