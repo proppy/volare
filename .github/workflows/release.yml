@@ -98,7 +98,7 @@ jobs:
           echo "::set-output name=GFMCU180_PDK_REV::$GFMCU180_PDK_REV"
           echo "::set-output name=GFMCU180_PDK_DATE::$GFMCU180_PDK_DATE"
           echo "::set-output name=GFMCU180_PDK_SHORT::$GFMCU180_PDK_SHORT"
-          TAG=gf180mcu-${OPEN_PDKS_SHORT}_${GFMCU180_PDK_SHORT}_${SHORT_VOLARE_SHORT}
+          TAG=gf180mcu-${OPEN_PDKS_SHORT}_${GFMCU180_PDK_SHORT}_${VOLARE_SHORT}
           TAG_EXISTS=$(git tag -l $TAG)
           echo "::set-output name=TAG::$TAG"
           echo "::set-output name=TAG_EXISTS::$TAG_EXISTS"
@@ -169,6 +169,7 @@ jobs:
       OPEN_PDKS_DATE: ${{ needs.pdk.outputs.OPEN_PDKS_DATE }}
       GFMCU180_PDK_REV: ${{ needs.pdk.outputs.GFMCU180_PDK_REV }}
       GFMCU180_PDK_SHORT: ${{ needs.pdk.outputs.GFMCU180_PDK_SHORT }}
+      GFMCU180_PDK_DATE: ${{ needs.pdk.outputs.GFMCU180_PDK_DATE }}
       TAG: ${{ needs.pdk.outputs.TAG }}
       TAG_EXISTS: ${{ needs.pdk.outputs.TAG_EXISTS }}
     runs-on: ubuntu-latest
@@ -202,11 +203,13 @@ jobs:
           body: |
             ${{ env.PDK_FAMILY }} variants built using open_pdks ${{ env.OPEN_PDKS_REV }} (released on ${{ env.OPEN_PDKS_DATE }})
 
+            ```
             GFMCU180_PDK_REV=${{ env.GFMCU180_PDK_REV }}
             GFMCU180_PDK_DATE=${{ env.GFMCU180_PDK_DATE }}
             OPEN_PDKS_REV=${{ env.OPEN_PDKS_REV }}
             OPEN_PDKS_DATE=${{ env.OPEN_PDKS_DATE }}
             VOLARE_REV=${{ env.VOLARE_REV }}
             VOLARE_DATE=${{ env.VOLARE_DATE }}
+            ```
           files: |
             default.tar.xz
