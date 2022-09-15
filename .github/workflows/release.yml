@@ -26,13 +26,29 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: 'The-OpenROAD-Project/OpenLane'
+          ref: 'master'
           path: 'OpenLane'
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'efabless/open_pdks'
+          ref: 'master'
+          path: 'open_pdks'
+
+      - uses: actions/checkout@v3
+        with:
+          repository: 'google/gf180-mcu-pdk'
+          ref: 'main'
+          path: 'gf180mcu-pdk'
+          submodules: true
 
       - name: build
         run: |
           env/bin/volare build \
             --pdk ${{ matrix.family }} \
-            --metadata-file=OpenLane/dependencies/tool_metadata.yml
+            --metadata-file=OpenLane/dependencies/tool_metadata.yml \
+            --use-repo-at open_pdks=$(readlink -f open_pdks) \
+            --use-repo-at gf180mcu=$(readlink -f gf180mcu-pdk)
 
       - name: compress
         run: |
