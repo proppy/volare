@@ -61,6 +61,12 @@ jobs:
           PDK_DATE=$(git --git-dir $(env/bin/volare path)/volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)
           echo "PDK_DATE=$PDK_DATE" >> $GITHUB_ENV
 
+      - name: upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+            name: ${{ matrix.family }}
+            path: default.tar.xz
+
       - uses: softprops/action-gh-release@v1
         with:
           name: ${{ matrix.family }}-${{ env.PDK_VERSION }}
@@ -68,3 +74,4 @@ jobs:
             ${{ matrix.family }} variants built using open_pdks ${{ env.PDK_VERSION }} (released on ${{ env.PDK_DATE }})
           files: |
             default.tar.xz
+        if: startsWith(github.ref, 'refs/tags/')
