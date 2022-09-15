@@ -253,15 +253,6 @@ def build_variants(
             for id in docker_ids:
                 subprocess.call(["docker", "kill", id])
 
-        console.log("Fixing file ownership…")
-        docker_run_sh(
-            """
-                set +e
-                OWNERSHIP="$(stat -c "%u:%g" $PDK_ROOT)"
-                chown -R $OWNERSHIP $PDK_ROOT
-            """,
-            log_to=os.path.join(log_dir, "ownership.log"),
-        )
         if interrupted is not None:
             raise interrupted
         else:
