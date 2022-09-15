@@ -338,7 +338,3 @@ def build(
     build_variants(
         sram, build_directory, open_pdks_path, gf180mcu_path, magic_tag, log_dir, jobs
     )
-    install_gf180mcu(build_directory, pdk_root, version)
-
-    if clear_build_artifacts:
-        shutil.rmtree(build_directory)
