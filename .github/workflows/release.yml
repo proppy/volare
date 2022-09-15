@@ -53,15 +53,15 @@ jobs:
           echo "VOLARE_PATH=$VOLARE_PATH" >> $GITHUB_ENV
           echo "PDK_FAMILY=$PDK_FAMILY" >> $GITHUB_ENV
           OPEN_PDKS_DIR=$(readlink -f open_pdks)
-          OPEN_PDKS_REV=$(git --git-dir $OPEN_PDKS_DIR/.git rev-parse HEAD)
-          OPEN_PDKS_DATE=$(git --git-dir $OPEN_PDKS_DIR/.git log -1 --pretty=format:"%ad" --date=iso)
+          OPEN_PDKS_REV=$(cd $OPEN_PDKS_DIR && git rev-parse HEAD)
+          OPEN_PDKS_DATE=$(cd $OPEN_PDKS_DIR && git log -1 --pretty=format:"%ad" --date=iso)
           FOUNDRY_PDK_DIR=$(readlink -f gf180mcu-pdk)
-          FOUNDRY_PDK_REV=$(git --gir-dir $FOUNDRY_PDK_DIR/.git rev-parse HEAD)
+          FOUNDRY_PDK_REV=$(cd $FOUNDRY_PDK_DIR && git rev-parse HEAD)
           echo "OPEN_PDKS_DIR=$OPEN_PDKS_DIR" >> $GITHUB_ENV
           echo "OPEN_PDKS_REV=$OPEN_PDKS_REV" >> $GITHUB_ENV
           echo "OPEN_PDKS_DATE=$OPEN_PDKS_DATE" >> $GITHUB_ENV
           echo "FOUNDRY_PDK_DIR=$FOUNDRY_PDK_DIR" >> $GITHUB_ENV
-          echo "FOUNDRY_PDK_REV=$FOUNDRY_PDK_REV >> $GITHUB_ENV
+          echo "FOUNDRY_PDK_REV=$FOUNDRY_PDK_REV" >> $GITHUB_ENV
 
       - name: cache build
         id: cache
