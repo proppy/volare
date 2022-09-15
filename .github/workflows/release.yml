@@ -50,10 +50,6 @@ jobs:
           ref: 'master'
           path: 'open_pdks'
 
-      - name: apply patches
-        run: |
-          (cd open_pdks && git pull https://github.com/kareefardi/open_pdks.git gf180-magic-version-update)
-
       - uses: actions/checkout@v3
         with:
           repository: 'google/gf180mcu-pdk'
