@@ -46,6 +46,13 @@ jobs:
           path: 'gf180mcu-pdk'
           submodules: true
 
+      - name: env
+        run: |
+          VOLARE_PATH=$(env/bin/volare path)
+          PDK_FAMILY=${{ matrix.family }}
+          echo "VOLARE_PATH=$VOLARE_PATH >> $GITHUB_ENV          
+          echo "PDK_FAMILY=$PDK_FAMILY >> $GITHUB_ENV
+          
       - name: build
         run: |
           env/bin/volare build \
@@ -53,23 +60,30 @@ jobs:
             --metadata-file=OpenLane/dependencies/tool_metadata.yml \
             --use-repo-at open_pdks=$(readlink -f open_pdks) \
             --use-repo-at gf180mcu=$(readlink -f gf180mcu-pdk)
+          PDK_VERSION=$(ls -t $VOLARE_PATH/volare/$PDK_FAMILY/versions | head -n 1)
+          PDK_DATE=$(git --git-dir $(env/bin/volare path)/volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)          
+          echo "PDK_VERSION=$PDK_VERSION" >> $GITHUB_ENV
+          echo "PDK_DATE=$PDK_DATE" >> $GITHUB_ENV
+
+      - name: upload logs
+        uses: actions/upload-artifact@v3
+        with:
+            name: ${{ matrix.family }}-build-logs
+            path: |
+              ${{ env.VOLARE_PATH }}/volare/logs
+        if: always()
 
       - name: compress
         run: |
-          VOLARE_PATH=$(env/bin/volare path)
-          PDK_FAMILY=${{ matrix.family }}
-          PDK_VERSION=$(ls -t $VOLARE_PATH/volare/$PDK_FAMILY/versions | head -n 1)
           tar -C $VOLARE_PATH/volare/$PDK_FAMILY/versions/$PDK_VERSION \
               -cvJf default.tar.xz .
-          echo "PDK_VERSION=$PDK_VERSION" >> $GITHUB_ENV
-          PDK_DATE=$(git --git-dir $(env/bin/volare path)/volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)
-          echo "PDK_DATE=$PDK_DATE" >> $GITHUB_ENV
 
-      - name: upload artifact
+      - name: upload archive
         uses: actions/upload-artifact@v3
         with:
-            name: ${{ matrix.family }}
-            path: default.tar.xz
+            name: ${{ matrix.family }}-build-archive
+            path: |
+              default.tar.xz
 
       - uses: softprops/action-gh-release@v1
         with:
