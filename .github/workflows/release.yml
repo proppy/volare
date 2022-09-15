@@ -98,7 +98,7 @@ jobs:
           echo "::set-output name=GFMCU180_PDK_REV::$GFMCU180_PDK_REV"
           echo "::set-output name=GFMCU180_PDK_DATE::$GFMCU180_PDK_DATE"
           echo "::set-output name=GFMCU180_PDK_SHORT::$GFMCU180_PDK_SHORT"
-          TAG=gf180mcu-$OPEN_PDKS_SHORT_$GFMCU180_PDK_SHORT_VOLARE_SHORT
+          TAG=gf180mcu-${OPEN_PDKS_SHORT}_${GFMCU180_PDK_SHORT}_${echo SHORT_VOLARE_SHORT}
           TAG_EXISTS=$(git tag -l $TAG)
           echo "::set-output name=TAG::$TAG"
           echo "::set-output name=TAG_EXISTS::$TAG_EXISTS"
