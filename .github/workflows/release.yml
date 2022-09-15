@@ -133,11 +133,16 @@ jobs:
           tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
               -cvJhf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
 
-    - name: populate tar cache
-      uses: actions/cache@v2
-      with:
-        path: default.tar.xz
-        key: ${{ runner.os }}-tar-${{ github.run_id }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.TAG }}
+          path: default.tar.xz
+
+      - name: populate tar cache
+        uses: actions/cache@v2
+        with:
+          path: default.tar.xz
+          key: ${{ runner.os }}-tar-${{ github.run_id }}
 
   release:
     needs: pdk
