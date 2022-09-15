@@ -183,7 +183,7 @@ jobs:
       - name: compress
         run: |
           tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
-              -cvJf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
+              -cvJfh default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
 
       - name: tag and push
         run: |
