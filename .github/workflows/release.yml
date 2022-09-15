@@ -128,33 +128,16 @@ jobs:
             path: |
               ${{ env.VOLARE_PATH }}/volare/logs/*/*.log
 
-  artifact:
-    needs: pdk
-    env:
-      VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
-      OPEN_PDKS_REV: ${{ needs.pdk.outputs.OPEN_PDKS_REV }}
-      GFMCU180_PDK_REV: ${{ needs.pdk.outputs.GFMCU180_PDK_REV }}
-    strategy:
-      matrix:
-        variant: [gf180mcuA, gf180mcuB, gf180mcuC]
-    runs-on: ubuntu-latest
-    steps:
-      - name: restore build cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.VOLARE_PATH }}/volare/gf180mcu/build/${{ env.OPEN_PDKS_REV}}
-          key:
-            ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
-
       - name: compress
         run: |
           tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
-              -cvhJf ${{ matrix.variant }}.tar.xz ${{ matrix.variant}}/
+              -cvJhf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.variant }}
-          path: ${{ matrix.variant }}.tar.xz
+    - name: populate tar cache
+      uses: actions/cache@v2
+      with:
+        path: default.tar.xz
+        key: ${{ runner.os }}-tar-${{ github.run_id }}
 
   release:
     needs: pdk
@@ -174,19 +157,11 @@ jobs:
       TAG_EXISTS: ${{ needs.pdk.outputs.TAG_EXISTS }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: restore build cache
+      - name: restore tar cache
         uses: actions/cache@v3
         with:
-          path: ${{ env.VOLARE_PATH }}/volare/gf180mcu/build/${{ env.OPEN_PDKS_REV}}
-          key:
-            ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
-
-      - name: compress
-        run: |
-          tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
-              -cvJhf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
+          path: default.tar.xz
+          key: ${{ runner.os }}-tar-${{ github.run_id }}
 
       - name: tag and push
         run: |
