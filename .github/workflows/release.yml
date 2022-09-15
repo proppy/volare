@@ -142,12 +142,6 @@ jobs:
           name: ${{ env.TAG }}
           path: default.tar.xz
 
-      - name: populate tar cache
-        uses: actions/cache@v2
-        with:
-          path: default.tar.xz
-          key: ${{ runner.os }}-tar-${{ github.run_id }}
-
   release:
     needs: pdk
     if: ${{ needs.pdk.outputs.TAG_EXISTS == '' }}
@@ -166,11 +160,11 @@ jobs:
       TAG_EXISTS: ${{ needs.pdk.outputs.TAG_EXISTS }}
     runs-on: ubuntu-latest
     steps:
-      - name: restore tar cache
-        uses: actions/cache@v3
+      - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
         with:
-          path: default.tar.xz
-          key: ${{ runner.os }}-tar-${{ github.run_id }}
+          name: ${{ env.TAG }}
 
       - name: tag and push
         run: |
