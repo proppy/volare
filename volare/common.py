@@ -25,17 +25,11 @@ from typing import Optional, Callable, List, Dict
 import rich
 import click
 
-# Datetime Helpers
-ISO8601_FMT = "%Y-%m-%dT%H:%M:%SZ"
-
-
 def date_to_iso8601(date: datetime) -> str:
-    return date.strftime(ISO8601_FMT)
-
+    return date.isoformat()
 
 def date_from_iso8601(string: str) -> datetime:
-    return datetime.strptime(string, ISO8601_FMT)
-
+    return datetime.fromisoformat(string)
 
 # ---
 
