@@ -105,12 +105,14 @@ jobs:
             ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
 
       - uses: actions/checkout@v3
+        if: steps.cache.outputs.cache-hit != 'true'
         with:
           repository: 'The-OpenROAD-Project/OpenLane'
           ref: 'master'
           path: 'OpenLane'
 
       - name: init submodules
+        if: steps.cache.outputs.cache-hit != 'true'
         working-directory: gf180mcu-pdk
         run: |
           git submodule update --init --recursive
