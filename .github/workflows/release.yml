@@ -116,13 +116,11 @@ jobs:
       - name: build
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          echo env/bin/volare build \
+          env/bin/volare build \
             --pdk gf180mcu \
             --metadata-file=OpenLane/dependencies/tool_metadata.yml \
             --use-repo-at open_pdks=$OPEN_PDKS_PATH \
             --use-repo-at gf180mcu=$GFMCU180_PDK_PATH
-          mkdir -p $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/{gf180mcuA,gf180mcuB,gf180mcuC}
-          touch $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/{gf180mcuA,gf180mcuB,gf180mcuC}/foo
 
       - name: upload logs
         if: always()
