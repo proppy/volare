@@ -149,12 +149,12 @@ jobs:
       - name: tar
         run: |
           tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
-              -cvf ${{ matrix.variant}}.tar ${{ matrix.variant}}/
+              -cvfhJ ${{ matrix.variant}}.tar.xz ${{ matrix.variant}}/
 
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.variant }}
-          path: ${{ matrix.variant }}.tar
+          path: ${{ matrix.variant }}.tar.xz
 
   release:
     needs: pdk
