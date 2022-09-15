@@ -128,9 +128,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-            name: gf180mcu-build-logs
-            path: |
-              ${{ env.VOLARE_PATH }}/volare/logs/*/*.log
+          name: gf180mcu-build-logs
+          path: |
+            ${{ env.VOLARE_PATH }}/volare/logs/*/*.log
 
       - name: compress
         run: |
@@ -139,7 +139,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.TAG }}
+          name: gf180mcu-build-pdks
           path: default.tar.xz
 
   release:
@@ -164,7 +164,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: ${{ env.TAG }}
+          name: gf180mcu-build-pdks
 
       - name: tag and push
         run: |
