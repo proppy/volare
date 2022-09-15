@@ -6,12 +6,28 @@ on:
   schedule:
     - cron: "*/15 * * * *"
 
+env:
+  CACHE_NUMBER: 0
+
 permissions:
   contents: write
 
 jobs:
   pdk:
     runs-on: ubuntu-latest
+    outputs:
+      VOLARE_PATH: ${{ steps.env.outputs.VOLARE_PATH }}
+      VOLARE_REV: ${{ steps.env.outputs.VOLARE_REV }}
+      VOLARE_DATE: ${{ steps.env.outputs.VOLARE_DATE }}
+      VOLARE_SHORT: ${{ steps.env.outputs.VOLARE_SHORT }}
+      OPEN_PDKS_REV: ${{ steps.env.outputs.OPEN_PDKS_REV }}
+      OPEN_PDKS_SHORT: ${{ steps.env.outputs.OPEN_PDKS_SHORT }}
+      OPEN_PDKS_DATE: ${{ steps.env.outputs.OPEN_PDKS_DATE }}
+      GFMCU180_PDK_REV: ${{ steps.env.outputs.GFMCU180_PDK_REV }}
+      GFMCU180_PDK_SHORT: ${{ steps.env.outputs.GFMCU180_PDK_SHORT }}
+      GFMCU180_PDK_DATE: ${{ steps.env.outputs.GFMCU180_PDK_DATE }}
+      TAG: ${{ steps.env.outputs.TAG }}
+      TAG_EXISTS: ${{ steps.env.outputs.TAG_EXISTS }}
     steps:
       - uses: actions/checkout@v3
 
@@ -45,18 +61,21 @@ jobs:
           path: 'gf180mcu-pdk'
           submodules: true
 
-      - name: env
+      - id: env
+        name: env
         run: |
           VOLARE_PATH=$(env/bin/volare path)
           VOLARE_REV=$(git rev-parse HEAD)
           VOLARE_DATE=$(git log -1 --pretty=format:"%ad" --date=iso)
           VOLARE_SHORT=$(git rev-parse --short HEAD)
-          PDK_FAMILY=gf180mcu
           echo "VOLARE_PATH=$VOLARE_PATH" >> $GITHUB_ENV
           echo "VOLARE_REV=$VOLARE_REV" >> $GITHUB_ENV
           echo "VOLARE_DATE=$VOLARE_DATE" >> $GITHUB_ENV
           echo "VOLARE_SHORT=$VOLARE_SHORT" >> $GITHUB_ENV
-          echo "PDK_FAMILY=$PDK_FAMILY" >> $GITHUB_ENV
+          echo "::set-output name=VOLARE_PATH::$VOLARE_PATH"
+          echo "::set-output name=VOLARE_REV::$VOLARE_REV"
+          echo "::set-output name=VOLARE_DATE::$VOLARE_DATE"
+          echo "::set-output name=VOLARE_SHORT::$VOLARE_SHORT"
           OPEN_PDKS_PATH=$(readlink -f open_pdks)
           OPEN_PDKS_REV=$(cd $OPEN_PDKS_PATH && git rev-parse HEAD)
           OPEN_PDKS_SHORT=$(cd $OPEN_PDKS_PATH && git rev-parse --short HEAD)
@@ -65,6 +84,9 @@ jobs:
           echo "OPEN_PDKS_REV=$OPEN_PDKS_REV" >> $GITHUB_ENV
           echo "OPEN_PDKS_SHORT=$OPEN_PDKS_SHORT" >> $GITHUB_ENV
           echo "OPEN_PDKS_DATE=$OPEN_PDKS_DATE" >> $GITHUB_ENV
+          echo "::set-output name=OPEN_PDKS_REV::$OPEN_PDKS_REV"
+          echo "::set-output name=OPEN_PDKS_DATE::$OPEN_PDKS_DATE"
+          echo "::set-output name=OPEN_PDKS_SHORT::$OPEN_PDKS_SHORT"
           GFMCU180_PDK_PATH=$(readlink -f gf180mcu-pdk)
           GFMCU180_PDK_REV=$(cd $GFMCU180_PDK_PATH && git rev-parse HEAD)
           GFMCU180_PDK_SHORT=$(cd $GFMCU180_PDK_PATH && git rev-parse --short HEAD)
@@ -73,14 +95,19 @@ jobs:
           echo "GFMCU180_PDK_REV=$GFMCU180_PDK_REV" >> $GITHUB_ENV
           echo "GFMCU180_PDK_SHORT=$GFMCU180_PDK_SHORT" >> $GITHUB_ENV
           echo "GFMCU180_PDK_DATE=$GFMCU180_PDK_DATE" >> $GITHUB_ENV
+          echo "::set-output name=GFMCU180_PDK_REV::$GFMCU180_PDK_REV"
+          echo "::set-output name=GFMCU180_PDK_DATE::$GFMCU180_PDK_DATE"
+          echo "::set-output name=GFMCU180_PDK_SHORT::$GFMCU180_PDK_SHORT"
+          TAG=gf180mcu-${{ env.OPEN_PDKS_SHORT }}_${{ env.GFMCU180_PDK_SHORT }}_${{ env.VOLARE_SHORT }}
+          TAG_EXISTS="$(git tag -l $TAG)"
+          echo "::set-output name=TAG::$TAG"
+          echo "::set-output name=TAG_EXISTS::$TAG_EXISTS"
 
       - name: cache build
         id: cache
         uses: actions/cache@v3
-        env:
-          CACHE_NUMBER: 0
         with:
-          path: ${{ env.VOLARE_PATH }}/volare/${{ env.PDK_FAMILY}}/build/${{ env.OPEN_PDKS_REV}}
+          path: ${{ env.VOLARE_PATH }}/volare/gf180mcu/build/${{ env.OPEN_PDKS_REV}}
           key:
             ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
 
@@ -93,7 +120,6 @@ jobs:
             --use-repo-at open_pdks=$OPEN_PDKS_PATH \
             --use-repo-at gf180mcu=$GFMCU180_PDK_PATH
 
-
       - name: upload logs
         if: always()
         uses: actions/upload-artifact@v3
@@ -102,53 +128,64 @@ jobs:
             path: |
               ${{ env.VOLARE_PATH }}/volare/logs/*/*.log
 
-      - name: tar artifacts
+  artifact:
+    needs: pdk
+    env:
+      VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
+      OPEN_PDKS_REV: ${{ needs.pdk.outputs.OPEN_PDKS_REV }}
+      GFMCU180_PDK_REV: ${{ needs.pdk.outputs.GFMCU180_PDK_REV }}
+    strategy:
+      matrix:
+        variant: [gf180mcuA, gf180mcuB, gf180mcuC]
+    runs-on: ubuntu-latest
+    steps:
+      - name: restore build cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.VOLARE_PATH }}/volare/gf180mcu/build/${{ env.OPEN_PDKS_REV}}
+          key:
+            ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
+
+      - name: tar
         run: |
-          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/build/$OPEN_PDKS_REV/ \
-              -cvf gf180mcuA.tar gf180mcuA/
-          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/build/$OPEN_PDKS_REV/ \
-              -cvf gf180mcuB.tar gf180mcuB/
-          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/build/$OPEN_PDKS_REV/ \
-              -cvf gf180mcuC.tar gf180mcuC/
+          tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
+              -cvf ${{ matrix.variant}}.tar ${{ matrix.variant}}/
 
-      - name: upload gf180mcuA artifact
-        uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v3
         with:
-          name: gf180mcuA
-          path: gf180mcuA.tar
+          name: ${{ matrix.variant }}
+          path: ${{ matrix.variant }}.tar
 
-      - name: upload gf180mcuB artifact
-        uses: actions/upload-artifact@v3
+  release:
+    needs: pdk
+    if: ${{ needs.pdk.outputs.TAG_EXISTS == '' }}
+    env:
+      VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
+      VOLARE_REV: ${{ needs.pdk.outputs.VOLARE_REV }}
+      VOLARE_DATE: ${{ needs.pdk.outputs.VOLARE_DATE }}
+      VOLARE_SHORT: ${{ needs.pdk.outputs.VOLARE_SHORT }}
+      OPEN_PDKS_REV: ${{ needs.pdk.outputs.OPEN_PDKS_REV }}
+      OPEN_PDKS_SHORT: ${{ needs.pdk.outputs.OPEN_PDKS_SHORT }}
+      OPEN_PDKS_DATE: ${{ needs.pdk.outputs.OPEN_PDKS_DATE }}
+      GFMCU180_PDK_REV: ${{ needs.pdk.outputs.GFMCU180_PDK_REV }}
+      GFMCU180_PDK_SHORT: ${{ needs.pdk.outputs.GFMCU180_PDK_SHORT }}
+      TAG: ${{ needs.pdk.outputs.TAG }}
+      TAG_EXISTS: ${{ needs.pdk.outputs.TAG_EXISTS }}
+
+    steps:
+      - name: restore build cache
+        uses: actions/cache@v3
         with:
-          name: gf180mcuB
-          path: gf180mcuB.tar
-
-      - name: upload gf180mcuC artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: gf180mcuC
-          path: gf180mcuC.tar
-
-      - name: generate tag
-        run: |
-          TAG=gf180mcu-${{ env.OPEN_PDKS_SHORT }}_${{ env.GFMCU180_PDK_SHORT }}_${{ env.VOLARE_SHORT }}
-          TAG_EXISTS="$(git tag -l $TAG)"
-          if [[ -z "$TAG_EXISTS" ]]; then
-            echo "generated tag: $TAG"
-            echo "TAG=$TAG" >> $GITHUB_ENV
-          else
-            echo "existing tag: $TAG_EXISTS"
-            echo "TAG_EXISTS=$TAG_EXISTS" >> $GITHUB_ENV
-          fi
+          path: ${{ env.VOLARE_PATH }}/volare/gf180mcu/build/${{ env.OPEN_PDKS_REV}}
+          key:
+            ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
 
       - name: compress
-        if: ${{ env.TAG_EXISTS == '' }}
         run: |
-          tar -C $VOLARE_PATH/volare/$PDK_FAMILY/build/$OPEN_PDKS_REV/ \
+          tar -C $VOLARE_PATH/volare/gf180mcu/build/$OPEN_PDKS_REV/ \
               -cvJf default.tar.xz gf180mcuA/ gf180mcuB/ gf180mcuC/
 
       - name: tag and push
-        if: ${{ env.TAG_EXISTS == '' }}
         run: |
           git config --local user.name gf180mcu@bot
           git config --local user.email gf180mcu@bot
@@ -156,7 +193,6 @@ jobs:
           git push origin "HEAD:refs/tags/$TAG"
 
       - name: release
-        if: ${{ env.TAG_EXISTS == '' }}
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ env.TAG }}
