@@ -11,7 +11,7 @@ jobs:
   pdk:
     strategy:
       matrix:
-        family: ['sky130', 'gf180mcu']
+        family: ['gf180mcu']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
