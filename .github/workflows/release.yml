@@ -43,7 +43,7 @@ jobs:
               -cvJf default.tar.xz .
           echo "PDK_VERSION=$PDK_VERSION" >> $GITHUB_ENV
           PDK_DATE=$(git --git-dir $(env/bin/volare path)/volare/$PDK_FAMILY/build/$PDK_VERSION/open_pdks/.git log -1 --pretty=format:"%ad" --date=iso)
-          echo "PDK_DATE=$PDK_DATE >> $GITHUB_ENV
+          echo "PDK_DATE=$PDK_DATE" >> $GITHUB_ENV
 
       - uses: softprops/action-gh-release@v1
         with:
