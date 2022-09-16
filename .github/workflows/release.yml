@@ -112,9 +112,9 @@ jobs:
         run: |
           env/bin/volare build \
             --pdk gf180mcu \
-            --version=$OPEN_PDKS_REV \
             --use-repo-at open_pdks=$OPEN_PDKS_PATH \
-            --use-repo-at gf180mcu=$GFMCU180_PDK_PATH
+            --use-repo-at gf180mcu=$GFMCU180_PDK_PATH \
+            $OPEN_PDKS_REV
 
       - name: upload logs
         if: always()
