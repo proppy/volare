@@ -29,7 +29,7 @@ jobs:
       GFMCU180_PDK_SHORT: ${{ steps.env.outputs.GFMCU180_PDK_SHORT }}
       GFMCU180_PDK_DATE: ${{ steps.env.outputs.GFMCU180_PDK_DATE }}
       TAG: ${{ steps.env.outputs.TAG }}
-      TAG_EXISTS: ${{ steps.env.outputs.TAG_EXISTS }}
+      TAG_NOT_FOUND: ${{ steps.env.outputs.TAG_NOT_FOUND }}
     steps:
       - uses: actions/checkout@v3
 
@@ -94,11 +94,13 @@ jobs:
           echo "::set-output name=GFMCU180_PDK_REV::$GFMCU180_PDK_REV"
           echo "::set-output name=GFMCU180_PDK_DATE::$GFMCU180_PDK_DATE"
           echo "::set-output name=GFMCU180_PDK_SHORT::$GFMCU180_PDK_SHORT"
+      - name: check tag
+        continue-on-error: true
+        run: |
           TAG=gf180mcu-${OPEN_PDKS_SHORT}_${GFMCU180_PDK_SHORT}_${VOLARE_SHORT}
-          git fetch --tags origin
-          TAG_EXISTS=$(git tag -l $TAG)
+          TAG_NOT_FOUND=$(git ls-remote --exit-code origin refs/tags/$TAG)
           echo "::set-output name=TAG::$TAG"
-          echo "::set-output name=TAG_EXISTS::$TAG_EXISTS"
+          echo "::set-output name=TAG_NOT_FOUND::$TAG_NOT_FOUND"
 
       - name: cache build
         id: cache
@@ -127,6 +129,7 @@ jobs:
 
   artifact:
     needs: pdk
+    if: ${{ needs.pdk.outputs.TAG_NOT_FOUND == 2 }}
     env:
       VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
       OPEN_PDKS_REV: ${{ needs.pdk.outputs.OPEN_PDKS_REV }}
@@ -154,7 +157,6 @@ jobs:
     needs:
       - pdk
       - artifact
-    if: ${{ needs.pdk.outputs.TAG_EXISTS == '' }}
     env:
       VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
       VOLARE_REV: ${{ needs.pdk.outputs.VOLARE_REV }}
