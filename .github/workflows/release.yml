@@ -108,7 +108,7 @@ jobs:
       - name: tag summary
         if: ${{ needs.pdk.outputs.TAG_NOT_FOUND == 0 }}
         run: |
-          echo "tag: \`$TAG\` already exists." >> $GITHUB_STEP_SUMMARY
+          echo "tag: \`${TAG}\` already exists: [release](https://github.com/proppy/volare-gf180mcu-wip/releases/tag/${TAG})." >> $GITHUB_STEP_SUMMARY
 
       - name: cache build
         id: cache
