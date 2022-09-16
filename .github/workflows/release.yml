@@ -109,7 +109,7 @@ jobs:
         if: ${{ needs.pdk.outputs.TAG_NOT_FOUND == 0 }}
         run: |
           cat << EOF >> $GITHUB_STEP_SUMMARY
-          [release](https://github.com/proppy/volare-gf180mcu-wip/releases/tag/${TAG} ``${TAG}`` already exists.
+          [release](https://github.com/proppy/volare-gf180mcu-wip/releases/tag/${TAG}) ``${TAG}`` already exists.
           EOF
 
       - name: cache build
