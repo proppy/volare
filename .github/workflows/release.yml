@@ -57,12 +57,6 @@ jobs:
           submodules: true
           path: 'gf180mcu-pdk'
 
-      - uses: actions/checkout@v3
-        with:
-          repository: 'The-OpenROAD-Project/OpenLane'
-          ref: 'master'
-          path: 'OpenLane'
-
       - id: env
         name: env
         run: |
@@ -118,7 +112,7 @@ jobs:
         run: |
           env/bin/volare build \
             --pdk gf180mcu \
-            --metadata-file=OpenLane/dependencies/tool_metadata.yml \
+            --version=$OPEN_PDKS_REV \
             --use-repo-at open_pdks=$OPEN_PDKS_PATH \
             --use-repo-at gf180mcu=$GFMCU180_PDK_PATH
 
@@ -129,6 +123,21 @@ jobs:
           name: gf180mcu-build-logs
           path: |
             ${{ env.VOLARE_PATH }}/volare/logs/*/*.log
+
+  artifact:
+    needs: pdk
+    env:
+      VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
+      OPEN_PDKS_REV: ${{ needs.pdk.outputs.OPEN_PDKS_REV }}
+      GFMCU180_PDK_REV: ${{ needs.env.outputs.GFMCU180_PDK_REV }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: restore build cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.VOLARE_PATH }}/volare/gf180mcu/build/${{ env.OPEN_PDKS_REV}}
+          key:
+            ${{ runner.os }}-build-${{ env.CACHE_NUMBER }}-${{ env.OPEN_PDKS_REV }}-${{ env.GFMCU180_PDK_REV }}
 
       - name: compress
         run: |
@@ -141,7 +150,7 @@ jobs:
           path: default.tar.xz
 
   release:
-    needs: pdk
+    needs: artifact
     if: ${{ needs.pdk.outputs.TAG_EXISTS == '' }}
     env:
       VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
