@@ -150,7 +150,9 @@ jobs:
           path: default.tar.xz
 
   release:
-    needs: artifact
+    needs:
+      - pdk
+      - artifact
     if: ${{ needs.pdk.outputs.TAG_EXISTS == '' }}
     env:
       VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
