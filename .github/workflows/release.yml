@@ -100,11 +100,6 @@ jobs:
         run: |
           TAG=gf180mcu-${OPEN_PDKS_SHORT}_${GFMCU180_PDK_SHORT}_${VOLARE_SHORT}
           TAG_NOT_FOUND=$(git ls-remote --exit-code origin refs/tags/$TAG)
-          if [[ $TAG_NOT_FOUND -eq 0 ]]; then 
-            cat << EOF >> $GITHUB_STEP_SUMMARY
-            [release](https://github.com/proppy/volare-gf180mcu-wip/releases/tag/$TAG) ``$TAG`` already exists.
-            EOF
-          fi
           echo "::set-output name=TAG::$TAG"
           echo "::set-output name=TAG_NOT_FOUND::$TAG_NOT_FOUND"
 
