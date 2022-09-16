@@ -94,13 +94,21 @@ jobs:
           echo "::set-output name=GFMCU180_PDK_REV::$GFMCU180_PDK_REV"
           echo "::set-output name=GFMCU180_PDK_DATE::$GFMCU180_PDK_DATE"
           echo "::set-output name=GFMCU180_PDK_SHORT::$GFMCU180_PDK_SHORT"
+
       - name: check tag
         continue-on-error: true
         run: |
           TAG=gf180mcu-${OPEN_PDKS_SHORT}_${GFMCU180_PDK_SHORT}_${VOLARE_SHORT}
           TAG_NOT_FOUND=$(git ls-remote --exit-code origin refs/tags/$TAG)
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "TAG_NOT_FOUND=$TAG_NOT_FOUND" >> $GITHUB_ENV
           echo "::set-output name=TAG::$TAG"
           echo "::set-output name=TAG_NOT_FOUND::$TAG_NOT_FOUND"
+
+      - name: tag summary
+        if: ${{ needs.pdk.outputs.TAG_NOT_FOUND == 0 }
+        run: |
+          echo "tag: \`$TAG\` already exists." >> $GITHUB_STEP_SUMMARY
 
       - name: cache build
         id: cache
