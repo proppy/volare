@@ -127,7 +127,7 @@ jobs:
     env:
       VOLARE_PATH: ${{ needs.pdk.outputs.VOLARE_PATH }}
       OPEN_PDKS_REV: ${{ needs.pdk.outputs.OPEN_PDKS_REV }}
-      GFMCU180_PDK_REV: ${{ needs.env.outputs.GFMCU180_PDK_REV }}
+      GFMCU180_PDK_REV: ${{ needs.pdk.outputs.GFMCU180_PDK_REV }}
     runs-on: ubuntu-latest
     steps:
       - name: restore build cache
